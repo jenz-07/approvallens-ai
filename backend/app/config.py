@@ -3,6 +3,7 @@ from pydantic import model_validator
 
 class Settings(BaseSettings):
     database_url: str = 'postgresql+psycopg://approval:approval@db/approval'
+    processing_mode: str = 'celery'
     redis_url: str = 'redis://redis:6379/0'
     environment: str = 'development'
     demo_enabled: bool = False
@@ -22,6 +23,7 @@ class Settings(BaseSettings):
     def secure(self):
         if self.database_url.startswith(('postgres://','postgresql://')):
             self.database_url='postgresql+psycopg://'+self.database_url.split('://',1)[1]
+        if self.processing_mode not in ('celery','embedded'): raise ValueError('Unknown processing mode')
         if self.environment not in ('development','production','test'): raise ValueError('Unknown environment')
         if self.storage_backend not in ('filesystem','s3'): raise ValueError('Unknown storage backend')
         if self.storage_backend=='s3' and not self.s3_bucket: raise ValueError('S3_BUCKET required for S3 storage')

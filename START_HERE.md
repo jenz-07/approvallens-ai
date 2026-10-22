@@ -29,6 +29,10 @@ Accounts: `applicant@demo.local`, `reviewer@demo.local`, `admin@demo.local`.
 
 The six synthetic applications exercise the review workflow. As reviewer, select a validation run and open **Evidence Intelligence** for its saved claims, contradictions and evidence graph. New validations create new analysis snapshots. Earlier runs without analysis must be revalidated.
 
+## Free demo hosting
+
+For the free demo adaptation, follow `docs/FREE_DEMO_SETUP.md`. It runs processing inside a single Render Free web service, with free Key Value for login limits. Use `sh start-free.sh` as the Render command. The paid worker instructions below are the original alternative.
+
 ## Deploy manually
 
 Follow `docs/HOSTED_SETUP.md`: Vercel frontend, Render API/worker/dispatcher and Redis, Supabase PostgreSQL/private storage. Services and credentials must be configured in your own accounts; this ZIP is not already deployed.

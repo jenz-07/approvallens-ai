@@ -1,5 +1,7 @@
 # Manual hosted setup
 
+**Free demo:** use `FREE_DEMO_SETUP.md` instead. The instructions below use separate paid background services.
+
 Target: Vercel frontend + Render backend processes + Supabase database/private objects. These instructions are configuration guidance; this release was not deployed to live accounts.
 
 ## 1. Source

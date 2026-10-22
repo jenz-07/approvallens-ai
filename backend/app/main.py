@@ -21,7 +21,9 @@ from .revisions import compare_runs
 from .providers import SimulatedAuthority
 from .worker import process_run
 
-app=FastAPI(title='ApprovalLens AI',version='1.0.0',docs_url='/api/v1/docs',openapi_url='/api/v1/openapi.json')
+from .embedded import lifespan
+
+app=FastAPI(lifespan=lifespan,title='ApprovalLens AI',version='1.0.0',docs_url='/api/v1/docs',openapi_url='/api/v1/openapi.json')
 app.add_middleware(CORSMiddleware,allow_origins=[settings.allowed_origin],allow_credentials=True,allow_methods=['GET','POST','PUT','PATCH'],allow_headers=['Content-Type','X-CSRF-Token','Idempotency-Key'])
 P='/api/v1'
 BOUNDARY='ApprovalLens AI provides preliminary decision support. Official scrutiny, required inspections, and final regulatory decisions remain with competent authorities.'
@@ -76,6 +78,9 @@ def enqueue(db,user,a,key):
     db.add(run);db.flush();db.add(JobDispatch(run_id=run.id));audit(db,user,a.id,'validation_queued',{'run_id':run.id});return run,True
 
 def dispatch(db,run):
+    if settings.processing_mode=='embedded':
+        # The committed database queue is polled by the in-service runner.
+        return
     # Best-effort low-latency delivery; committed outbox survives process/broker failures.
     job=db.scalar(select(JobDispatch).where(JobDispatch.run_id==run.id))
     try:

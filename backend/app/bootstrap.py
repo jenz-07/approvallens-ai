@@ -6,14 +6,18 @@ from .models import User,ReferenceSnapshot,ProviderConfig,RuleSet,RuleVersion,Ch
 from .security import hasher
 from .rules import RuleDefinition
 
-def bootstrap():
+def bootstrap(email=None,password=None,skip_existing=False):
     with SessionLocal() as db:
         if db.scalar(select(User.id)):
+            if skip_existing: return
             raise SystemExit('Users already exist. Use the existing administrator; bootstrap does not overwrite accounts.')
-        email=input('Administrator email: ').strip().lower()
-        password=getpass('Administrator password (12+ characters): ')
-        confirm=getpass('Repeat password: ')
-        if '@' not in email or len(password)<12 or password!=confirm:raise SystemExit('Invalid email, short password or password mismatch')
+        if email is None:
+            email=input('Administrator email: ')
+            password=getpass('Administrator password (12+ characters): ')
+            if password!=getpass('Repeat password: '): raise SystemExit('Passwords do not match')
+        email=email.strip().lower()
+        confirm=password
+        if '@' not in email or not password or len(password)<12 or password!=confirm:raise SystemExit('Invalid email, short password or password mismatch')
         db.add(User(email=email,role='administrator',password_hash=hasher.hash(password)))
         # Empty reference data never reports synthetic success on real submissions.
         db.add(ReferenceSnapshot(label='Empty operator reference snapshot',records={}))
