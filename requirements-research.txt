@@ -1,0 +1,9 @@
+numpy
+scikit-learn
+scipy
+networkx
+pyyaml
+matplotlib
+opencv-python-headless
+reportlab
+pytest

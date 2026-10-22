@@ -1,0 +1,3 @@
+ocr: {baseline: tesseract (existing backend), status: "not benchmarked here; VerifyBench uses simulated OCR noise"}
+extractor: {name: deterministic_label_parser, version: "1", llm_extractor: "interface only; disabled (no provider/credentials)"}
+llm_assisted_baseline_C: "not evaluated: requires an external model; adapter raises ModelUnavailable instead of fabricating output"

@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+SQLAlchemy
+alembic
+psycopg[binary]
+celery[redis]
+PyMuPDF==1.28.2
+pytesseract
+Pillow
+argon2-cffi
+python-multipart
+pydantic-settings
+boto3
+httpx
+pytest
+reportlab

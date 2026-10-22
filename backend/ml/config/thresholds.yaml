@@ -1,0 +1,9 @@
+# ILLUSTRATIVE cost model. These are assumptions, NOT stakeholder-validated costs.
+# Results include a sensitivity analysis over these values.
+costs:
+  false_positive: 1.0     # false alarm
+  false_negative: 5.0     # missed true contradiction
+  review: 0.4             # one human review of one unit
+cost_sensitivity:
+  review: [0.1, 0.2, 0.4, 0.8, 1.2]
+  false_negative: [2.0, 5.0, 10.0]

@@ -1,0 +1,40 @@
+[
+  {
+    "application_id": "42d28852-f122-4a53-8442-0588c6dd0829",
+    "scenario": "Complete application",
+    "expected_rule_ids": []
+  },
+  {
+    "application_id": "de31f896-f00f-4e0f-b975-8efe9b08a996",
+    "scenario": "Missing supporting certificate",
+    "expected_rule_ids": [
+      "REQ-CERT"
+    ]
+  },
+  {
+    "application_id": "52a6cb69-3a92-4bed-821b-48d18b11f3a4",
+    "scenario": "Expired certificate",
+    "expected_rule_ids": [
+      "EXPIRY"
+    ]
+  },
+  {
+    "application_id": "3975d318-079c-4b60-9301-901009ab8a9a",
+    "scenario": "Institution identifier mismatch",
+    "expected_rule_ids": [
+      "IDENTITY"
+    ]
+  },
+  {
+    "application_id": "4ba3373b-5496-4600-974d-ca139948c929",
+    "scenario": "Duplicate upload",
+    "expected_rule_ids": [
+      "DUPLICATE"
+    ]
+  },
+  {
+    "application_id": "0d553723-3496-4846-85b4-5f258519d5ac",
+    "scenario": "Unknown verification reference",
+    "expected_rule_ids": []
+  }
+]

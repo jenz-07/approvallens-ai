@@ -1,0 +1,102 @@
+# Standalone production configuration; do not merge with the local demo compose.
+services:
+  db:
+    image: postgres:17.6-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: approval
+      POSTGRES_USER: approval
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/configure_production.py}
+    volumes: ["postgres:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U approval"]
+      interval: 5s
+      retries: 20
+  redis:
+    image: redis:7.4.6-bookworm
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Run scripts/configure_production.py}
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?Run scripts/configure_production.py}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\""]
+    volumes: ["redis:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 20
+  migrate:
+    build: ./backend
+    env_file: .env.production
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db: {condition: service_healthy}
+  api:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env.production
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]
+    volumes: ["documents:/data/private"]
+    read_only: true
+    tmpfs: ["/tmp:size=256m"]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/ready',timeout=4)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+  worker:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env.production
+    command: ["celery", "-A", "app.worker.celery", "worker", "--loglevel=WARNING", "--concurrency=2"]
+    volumes: ["documents:/data/private"]
+    read_only: true
+    tmpfs: ["/tmp:size=512m"]
+    mem_limit: 2g
+    pids_limit: 150
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    depends_on:
+      api: {condition: service_healthy}
+  dispatcher:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env.production
+    command: ["python", "-m", "app.dispatcher"]
+    read_only: true
+    tmpfs: ["/tmp:size=64m"]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    depends_on:
+      api: {condition: service_healthy}
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:8000
+      NEXT_TELEMETRY_DISABLED: '1'
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    depends_on:
+      api: {condition: service_healthy}
+  gateway:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?Set deployment domain}
+      CADDY_EMAIL: ${CADDY_EMAIL:?Set certificate contact}
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes: ["./deploy/Caddyfile:/etc/caddy/Caddyfile:ro", "caddy_data:/data", "caddy_config:/config"]
+    depends_on:
+      api: {condition: service_healthy}
+      frontend: {condition: service_started}
+volumes:
+  postgres:
+  redis:
+  documents:
+  caddy_data:
+  caddy_config:

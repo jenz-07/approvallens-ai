@@ -1,0 +1,63 @@
+{
+ "features": [
+  "link_strength",
+  "st_conflict",
+  "st_ocr_confusable",
+  "st_ambiguous",
+  "st_variant",
+  "st_unknown",
+  "dissimilarity",
+  "min_ocr",
+  "mean_ocr",
+  "ocr_missing",
+  "edit_norm",
+  "is_id",
+  "is_date",
+  "is_name",
+  "is_addr",
+  "is_temporal",
+  "age_margin",
+  "corroboration",
+  "n_group"
+ ],
+ "coef": [
+  -0.4224364007971707,
+  6.576744145248896,
+  -0.22600778316523948,
+  0.608694693736312,
+  0.23893582527814675,
+  -0.03663534902421276,
+  3.8894270555783246,
+  1.4982190466516945,
+  1.0895131179585695,
+  0.0,
+  -3.487292674186905,
+  0.7367379929651935,
+  0.109183101327307,
+  -0.471650256789872,
+  -0.32540257261193145,
+  -0.20541557987778192,
+  4.525996480657525,
+  -2.0859176409720295,
+  -0.2695392778333168
+ ],
+ "intercept": -7.726435180424279,
+ "calibrator": {
+  "method": "platt",
+  "a": 1.2600328589141783,
+  "b": 0.2469379207416199
+ },
+ "provenance": {
+  "dataset_hash": "786f62007ea5ca60dc829ec814ab90b893337babed99cb1fc0e3efea0a4cce65",
+  "seed": 42,
+  "quick_mode": true,
+  "calibration": {
+   "cv_nll": {
+    "isotonic": 0.049524884562171176,
+    "platt": 0.03630556934984318
+   },
+   "selected": "platt"
+  }
+ },
+ "warning": "Trained and calibrated on SYNTHETIC VerifyBench data only. Not validated on real documents."
+}

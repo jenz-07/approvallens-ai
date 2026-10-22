@@ -1,0 +1,59 @@
+services:
+  db:
+    image: postgres:17.6-bookworm
+    environment:
+      POSTGRES_DB: approval
+      POSTGRES_USER: approval
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes: ["postgres:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U approval"]
+      interval: 5s
+      retries: 20
+  redis:
+    image: redis:7.4.6-bookworm
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: ["redis:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 20
+  migrate:
+    build: ./backend
+    env_file: .env
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db: {condition: service_healthy}
+  api:
+    build: ./backend
+    env_file: .env
+    volumes: ["documents:/data/private"]
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+  worker:
+    build: ./backend
+    env_file: .env
+    command: ["celery", "-A", "app.worker.celery", "worker", "--loglevel=WARNING", "--concurrency=2"]
+    volumes: ["documents:/data/private"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+  dispatcher:
+    build: ./backend
+    env_file: .env
+    command: ["python", "-m", "app.dispatcher"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+  frontend:
+    build: ./frontend
+    environment:
+      API_INTERNAL_URL: http://api:8000
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [api]
+volumes:
+  postgres:
+  redis:
+  documents:

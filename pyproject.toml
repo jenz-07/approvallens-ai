@@ -1,0 +1,7 @@
+[project]
+name = "approvallens-evidence-engine"
+version = "1.1.0"
+requires-python = ">=3.11"
+dependencies = ["numpy", "scikit-learn", "scipy", "networkx", "pyyaml", "matplotlib", "opencv-python-headless", "reportlab"]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
